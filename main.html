@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Live Streaming</title>
+		<link rel="stylesheet" href="style.css">
+	</head>
+	<body>
+		<div id = "chartContainer" style="float: right;">
+		<canvas class = "chart" id="mycanvas" width="600" height="500">
+		</div>
+		<div class="tweets">
+			<textarea placeholder="Search"></textarea>
+			<div class="tweet-list"></div>
+			<button type="button">Clear</button>
+		</div>
+		<script src="jquery.min.js"></script>
+		<script src="Chart.js"></script>
+		<script src="http://127.0.0.1:8080/socket.io/socket.io.js"></script>
+		<script>
+		var getNode = function(s) {
+					return document.querySelector(s);
+			};
+		var tweetList = getNode('.tweet-list');
+		var textarea = getNode('.tweets textarea');
+		var button = getNode('.tweets button');
+
+		try{
+			var socket = io.connect('http://127.0.0.1:8080');
+		}
+		catch(e){
+					//console.log('connection failed');
+		}
+
+		if(socket !== undefined){
+
+				var canvas = document.getElementById('mycanvas'),
+    			ctx = canvas.getContext('2d'),
+    			startingData = {
+      			labels: [-9, -8, -7, -6, -5, -4, -3, -2, -1, 0],
+      			datasets: [
+          		{
+              fillColor: "rgba(20,220,220,0.2)",
+              strokeColor: "rgba(220,220,220,1)",
+              pointColor: "rgba(220,220,220,1)",
+              pointStrokeColor: "#0ff",
+              data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+         	 	}]
+    			},
+    			latestLabel = startingData.labels[9];
+
+				// Reduce the animation steps for demo clarity.
+				var myLiveChart = new Chart(ctx).Bar(startingData, {animationSteps: 15});
+
+
+
+			//Listen for output
+			socket.on('output', function(data){
+					var newTweet = document.createElement('div');
+					var tweetText = document.createElement('div');
+					var tweetScreenName = document.createElement('div');
+					newTweet.setAttribute('class','tweet');
+					newTweet.setAttribute('overflow','hidden')
+					tweetText.setAttribute('class','tweetText');
+					tweetScreenName.setAttribute('class','tweetScreenName');
+					tweetScreenName.textContent = data.screen_name+' : ';
+					tweetText.textContent = data.tweet_text;
+					newTweet.appendChild(tweetScreenName);
+					newTweet.appendChild(tweetText);
+					tweetList.appendChild(newTweet);
+					tweetList.insertBefore(newTweet, tweetList.firstChild);
+
+		});
+
+		socket.on('graph', function(data){
+
+				myLiveChart.addData([data], ++latestLabel);
+  				myLiveChart.removeData();		
+		});	
+
+		button.addEventListener('click', function(){
+			textarea.value = '';
+			socket.emit('clear','');
+			while(tweetList.hasChildNodes())
+				tweetList.removeChild(tweetList.firstChild);
+		});
+		
+		textarea.addEventListener('keydown', function(event){
+			var self = this;
+			if(event.which === 13 && event.shiftKey === false){
+				socket.emit('input',self.value);
+				event.preventDefault();
+			}
+		});	
+				
+			}
+		</script>
+	</body>
+</html> 

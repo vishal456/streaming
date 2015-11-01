@@ -1,0 +1,42 @@
+body,
+textarea,
+input {
+	font : 13px "Trebuchet MS", sans-serif;
+}
+
+.tweets{
+	max-width : 500px;
+	max-height : 500px;
+}
+
+.tweet-list,
+.tweets textarea{
+	border : 1px solid #bbb;
+}
+
+.tweet-list{
+	width : 125%;
+	height : 650px;
+	overflow-y : scroll;
+	padding : 10px;
+}
+
+.tweetText {
+	font : 11px "Trebuchet MS", sans-serif;
+	color: blue;
+	background-color: white;
+	padding-bottom : 12px;
+	padding-top: 2px;
+}
+.tweetScreenName {
+	font : 13px "Trebuchet MS", sans-serif;
+	background-color: blue;
+	color : white;
+}
+
+.chart {
+	padding-bottom : 10px;
+	padding-top: 50px;
+	padding-right: 100px;
+	padding-left: 10px;
+}
